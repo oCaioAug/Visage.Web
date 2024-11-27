@@ -1,0 +1,110 @@
+﻿@model Visage.Web.Models.Usuario;
+
+@{
+    ViewData["Title"] = "Inserir Usuário";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>Usuario</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="TipoUsuarioId" class="control-label"></label>
+                <select asp-for="TipoUsuarioId" class ="form-control" asp-items="ViewBag.TipoUsuarioId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Nome" class="control-label"></label>
+                <input asp-for="Nome" class="form-control" />
+                <span asp-validation-for="Nome" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DataNascimento" class="control-label"></label>
+                <input asp-for="DataNascimento" class="form-control" />
+                <span asp-validation-for="DataNascimento" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Cpf" class="control-label"></label>
+                <input asp-for="Cpf" class="form-control" />
+                <span asp-validation-for="Cpf" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <!-- Upload de Imagem -->
+            <div class="form-group">
+                <label for="foto" class="control-label">Inserir Foto</label>
+                <input type="file" id="foto" name="foto" accept=".png, .jpg, .jpeg" class="form-control-file" required>
+                <img id="user-preview" src="#" alt="Pré-visualização da Foto" class="img-thumbnail mt-2" style="display:none; max-width: 200px;">
+                <input type="hidden" id="Base64Image" name="Base64Image" />
+                <span asp-validation-for="Base64Image" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Embedding" class="control-label"></label>
+                <input asp-for="Embedding" class="form-control" />
+                <span asp-validation-for="Embedding" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Senha" class="control-label"></label>
+                <input asp-for="Senha" class="form-control" password required />
+                <span asp-validation-for="Senha" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Voltar</a>
+</div>
+
+<script>
+    let reader = new FileReader(); // Variável global para reutilizar o FileReader
+
+    document.getElementById('foto').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.src = e.target.result;
+
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    // Redimensionar a imagem (ex.: largura máxima de 500px)
+                    const MAX_WIDTH = 500;
+                    const scale = Math.min(MAX_WIDTH / img.width, 1);
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    // Converter a imagem compactada para Base64
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); // Qualidade de 70%
+                    document.getElementById('Base64Image').value = compressedBase64.split(',')[1];
+
+                    // Pré-visualização
+                    const preview = document.getElementById('user-preview');
+                    preview.src = compressedBase64;
+                    preview.style.display = "block";
+                };
+            };
+
+            reader.readAsDataURL(file);
+        }
+    });
+
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
